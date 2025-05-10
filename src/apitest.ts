@@ -1,5 +1,6 @@
 interface ApiTestOptions {
   url: string;
+  method?: string;
   query?: Record<string, string>;
   headers?: Record<string, string>;
   body?: any;
@@ -12,6 +13,7 @@ interface ApiTestResponse {
 
 export async function apiTest({
   url,
+  method,
   query,
   headers,
   body
@@ -27,7 +29,7 @@ export async function apiTest({
 
     // 发送请求
     const response = await fetch(urlObj.toString(), {
-      method: body ? 'POST' : 'GET',
+      method: method || (body ? 'POST' : 'GET'),
       headers: headers || {},
       body: body ? JSON.stringify(body) : undefined
     });

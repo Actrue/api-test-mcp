@@ -5,7 +5,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "go":"npm run build && npm run start"
+    "go":"pnpm i && pnpm run build && npm run start"
   },
   "dependencies": {
     "fastmcp": "^1.27.4"

@@ -51,9 +51,5 @@ server.addTool({
 });
 
 server.start({
-  transportType: "sse",
-  sse:{
-    port:3000,
-    endpoint:"/sse"
-  }
+  transportType: "stdio"
 });
