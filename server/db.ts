@@ -137,7 +137,7 @@ async function getAllTable(uuid: string | undefined) {
             return {
                 state: true,
                 message: '查询成功',
-                data: tables
+                data: tables?.testTasks
             }
         }else{
             const tables = await prisma.testTable.findMany({});
@@ -216,3 +216,4 @@ async function updateTaskWithSummary(tasks: Array<{uuid: string, summary: string
         };
     }
 }
+

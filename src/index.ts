@@ -3,6 +3,8 @@ import { z } from "zod"; // Or any validation library that supports Standard Sch
 import { apiTest } from "./apitest.js"; 
 import { db } from "../server/db.js";
 import { executeTasksAndSaveResults } from "../server/apiTest.js";
+import { exportToExcel } from "../server/createExcel.js";
+
 const server = new FastMCP({
   name: "My Server",
   version: "1.0.0",
@@ -61,6 +63,7 @@ server.addTool({
     }))
   }),
   execute: async (args) => {
+    console.log(args)
    
     try {
       const result = await db.createTestPlanWithTasks(args.planName, args.tasks);
@@ -174,10 +177,64 @@ server.addTool({
   },
 });
 
+server.addTool({
+  name: "update-task",
+  description: "更新指定任务的信息",
+  parameters: z.object({
+    uuid: z.string(),
+    updateData: z.object({
+      name: z.string().optional(),
+      method: z.string().optional(),
+      url: z.string().optional(),
+      query: z.record(z.string()).optional(),
+      headers: z.record(z.string()).optional(),
+      body: z.any().optional(),
+      hopeRes: z.string().optional(),
+      res: z.string().optional(),
+      review: z.string().optional(),
+      suggest: z.string().optional(),
+      isFinish: z.boolean().optional(),
+      status: z.boolean().optional()
+    })
+  }),
+  execute: async (args) => {
+    try {
+      const result = await db.updateTaskByUuid(args.uuid, args.updateData);
+      return JSON.stringify(result);
+    } catch (error) {
+      return JSON.stringify({
+        code: 0,
+        message: error instanceof Error ? error.message : '更新失败',
+        data: null
+      });
+    }
+  },
+});
+
+server.addTool({
+  name: "export-test-results",
+  description: "将指定测试计划的任务结果导出到Excel文件",
+  parameters: z.object({
+    uuid: z.string()
+  }),
+  execute: async (args) => {
+    try {
+      const result = await exportToExcel(args.uuid);
+      return JSON.stringify(result);
+    } catch (error) {
+      return JSON.stringify({
+        state: false,
+        message: error instanceof Error ? error.message : '导出Excel失败',
+        data: null
+      });
+    }
+  },
+});
+
 server.start({
   transportType: "sse",
   sse:{
-    port:3000,
+    port:3001,
     endpoint:"/sse"
   }
 });
