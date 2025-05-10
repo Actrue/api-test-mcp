@@ -7,8 +7,13 @@ interface ApiTestOptions {
 }
 
 interface ApiTestResponse {
-  headers: Record<string, string>;
-  body: any;
+  status: boolean;
+  message: string;
+  data: {
+    statusCode: number;
+    headers: Record<string, string>;
+    body: any;
+  };
 }
 
 export async function apiTest({
@@ -49,10 +54,23 @@ export async function apiTest({
     }
 
     return {
-      headers: responseHeaders,
-      body: responseBody
+      status: true,
+      message: '请求成功',
+      data: {
+        statusCode: response.status,
+        headers: responseHeaders,
+        body: responseBody
+      }
     };
   } catch (error) {
-    throw new Error(`API测试失败: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      status: false,
+      message: `API测试失败: ${error instanceof Error ? error.message : String(error)}`,
+      data: {
+        statusCode: 0,
+        headers: {},
+        body: null
+      }
+    };
   }
 }

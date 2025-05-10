@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model TestTable{
+  uuid String @id@default(uuid())
+  name  String 
+  status Boolean @default(true)
+  isFinish Boolean @default(false)
+
+  createTime DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  testTasks TestTask[]
+}
+
+model TestTask{
+  uuid String @id@default(uuid())
+  testTable TestTable @relation(fields: [testTableUuid], references: [uuid])
+  testTableUuid String
+  name String 
+  url String
+  method String
+  query Json?
+  headers Json?
+  body Json?
+  hopeRes String  //预期结果
+  res  String?    //结果
+  review String?  //总结
+  suggest String? //改进建议
+  isFinish Boolean @default(false)
+  status Boolean @default(true)
+  createTime DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+}

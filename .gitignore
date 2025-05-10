@@ -26,3 +26,5 @@ lerna-debug.log*
 appenv.ts
 # misc
 .DS_Store
+generated/prisma/
+prisma/*.db
