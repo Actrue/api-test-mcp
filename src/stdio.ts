@@ -19,15 +19,22 @@ server.addTool({
   }),
   execute: async (args) => {
     
-      // 处理单个请求
-      const result = await apiTest({
-        url: args.url,
-        method: args.method,
-        query: args.query,
-        headers: args.headers,
-        body: args.body
-      });
-      return JSON.stringify(result);
+      try {
+        // 处理单个请求
+        const result = await apiTest({
+          url: args.url,
+          method: args.method,
+          query: args.query,
+          headers: args.headers,
+          body: args.body
+        });
+        return JSON.stringify(result);
+      } catch (error) {
+        return JSON.stringify({
+          error: true,
+          message: error instanceof Error ? error.message : '未知错误'
+        });
+      }
     
   },
 });
