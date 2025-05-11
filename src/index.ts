@@ -66,15 +66,17 @@ server.addTool({
     console.log(args)
    
     try {
-      await db.createTestPlanWithTasks(args.planName, args.tasks);
+      const res = await db.createTestPlanWithTasks(args.planName, args.tasks);
       return JSON.stringify({
         state: 1,
-        message: '创建成功'
+        message: '创建成功',
+        data: res.data?.tasks.map((task: any) => ({ uuid: task.uuid,name: task.name }))
       });
     } catch (error) {
       return JSON.stringify({
         state: 0,
-        message: error instanceof Error ? error.message : '创建失败'
+        message: error instanceof Error ? error.message : '创建失败',
+        data:null
       });
     }
   },
