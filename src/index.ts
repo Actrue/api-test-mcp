@@ -66,13 +66,15 @@ server.addTool({
     console.log(args)
    
     try {
-      const result = await db.createTestPlanWithTasks(args.planName, args.tasks);
-      return JSON.stringify(result);
+      await db.createTestPlanWithTasks(args.planName, args.tasks);
+      return JSON.stringify({
+        state: 1,
+        message: '创建成功'
+      });
     } catch (error) {
       return JSON.stringify({
         state: 0,
-        message: error instanceof Error ? error.message : '创建失败',
-        data: null
+        message: error instanceof Error ? error.message : '创建失败'
       });
     }
   },
@@ -110,13 +112,15 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      const result = await executeTasksAndSaveResults(args.tableUuid);
-      return JSON.stringify(result);
+      await executeTasksAndSaveResults(args.tableUuid);
+      return JSON.stringify({
+        state: true,
+        message: '执行成功'
+      });
     } catch (error) {
       return JSON.stringify({
         state: false,
-        message: error instanceof Error ? error.message : '执行失败',
-        data: null
+        message: error instanceof Error ? error.message : '执行失败'
       });
     }
   },
@@ -140,13 +144,15 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      const result = await db.addTasksToPlan(args.uuid, args.tasks);
-      return JSON.stringify(result);
+      await db.addTasksToPlan(args.uuid, args.tasks);
+      return JSON.stringify({
+        state: true,
+        message: '添加任务成功'
+      });
     } catch (error) {
       return JSON.stringify({
         state: false,
-        message: error instanceof Error ? error.message : '添加任务失败',
-        data: null
+        message: error instanceof Error ? error.message : '添加任务失败'
       });
     }
   },
@@ -199,13 +205,15 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      const result = await db.updateTaskByUuid(args.uuid, args.updateData);
-      return JSON.stringify(result);
+      await db.updateTaskByUuid(args.uuid, args.updateData);
+      return JSON.stringify({
+        code: 1,
+        message: '更新成功'
+      });
     } catch (error) {
       return JSON.stringify({
         code: 0,
-        message: error instanceof Error ? error.message : '更新失败',
-        data: null
+        message: error instanceof Error ? error.message : '更新失败'
       });
     }
   },
@@ -219,13 +227,16 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      const result = await exportToExcel(args.uuid);
-      return JSON.stringify(result);
+      const filePath = await exportToExcel(args.uuid);
+      return JSON.stringify({
+        state: true,
+        message: '导出成功',
+        filePath: filePath.data
+      });
     } catch (error) {
       return JSON.stringify({
         state: false,
-        message: error instanceof Error ? error.message : '导出Excel失败',
-        data: null
+        message: error instanceof Error ? error.message : '导出Excel失败'
       });
     }
   },
