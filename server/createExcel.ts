@@ -21,7 +21,16 @@ export async function exportToExcel(uuid: string) {
         
         // 转换数据为工作表
     
-        const dataToExport = result.data || [];
+        const dataToExport = result.data ? result.data.map(item => {
+
+            //@ts-ignore
+            if (item.query) item.query = JSON.stringify(item.query, null, 2);
+            //@ts-ignore
+            if (item.headers) item.headers = JSON.stringify(item.headers, null, 2);
+            //@ts-ignore
+            if (item.body) item.body = JSON.stringify(item.body, null, 2);
+            return item;
+        }) : [];
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         
         // 添加工作表到工作簿

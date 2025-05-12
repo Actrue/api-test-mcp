@@ -1,6 +1,6 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod"; // Or any validation library that supports Standard Schema
-import { apiTest } from "./apitest.js"; 
+import { apiTest } from "./apitest.js";
 import { db } from "../server/db.js";
 import { executeTasksAndSaveResults } from "../server/apiTest.js";
 import { exportToExcel } from "../server/createExcel.js";
@@ -22,28 +22,29 @@ server.addTool({
     body: z.any().optional()
   }),
   execute: async (args) => {
-    
-      try {
-        // 处理单个请求
-        const result = await apiTest({
-          url: args.url,
-          method: args.method,
-          query: args.query,
-          headers: args.headers,
-          body: args.body
-        });
-        return JSON.stringify({
-          states:true,
-          message:result.message,
-          data:result});
-      } catch (error) {
-        return JSON.stringify({
-          states:false,
-          error: true,
-          message: error instanceof Error ? error.message : '未知错误'
-        });
-      }
-    
+
+    try {
+      // 处理单个请求
+      const result = await apiTest({
+        url: args.url,
+        method: args.method,
+        query: args.query,
+        headers: args.headers,
+        body: args.body
+      });
+      return JSON.stringify({
+        states: true,
+        message: result.message,
+        data: result
+      });
+    } catch (error) {
+      return JSON.stringify({
+        states: false,
+        error: true,
+        message: error instanceof Error ? error.message : '未知错误'
+      });
+    }
+
   },
 });
 
@@ -64,19 +65,19 @@ server.addTool({
   }),
   execute: async (args) => {
     console.log(args)
-   
+
     try {
       const res = await db.createTestPlanWithTasks(args.planName, args.tasks);
       return JSON.stringify({
         state: 1,
         message: '创建成功',
-        data: res.data?.tasks.map((task: any) => ({ uuid: task.uuid,name: task.name }))
+        data: { tableData:{name:res.data?.plan.name,uuid:res.data?.plan.uuid}, taskData: res.data?.tasks.map((task: any) => ({ uuid: task.uuid, name: task.name })) }
       });
     } catch (error) {
       return JSON.stringify({
         state: 0,
         message: error instanceof Error ? error.message : '创建失败',
-        data:null
+        data: null
       });
     }
   },
@@ -114,15 +115,25 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      await executeTasksAndSaveResults(args.tableUuid);
+      const res=await executeTasksAndSaveResults(args.tableUuid);
       return JSON.stringify({
         state: true,
-        message: '执行成功'
+        message: '执行成功',
+        data: res.data?.map((item)=>{
+          return {
+            uuid: item.uuid,
+            name: item.name,
+            
+            res: item.res,
+          }
+
+        })
       });
     } catch (error) {
       return JSON.stringify({
         state: false,
-        message: error instanceof Error ? error.message : '执行失败'
+        message: error instanceof Error ? error.message : '执行失败',
+        data:null
       });
     }
   },
@@ -173,8 +184,13 @@ server.addTool({
   }),
   execute: async (args) => {
     try {
-      const result = await db.updateTaskWithSummary(args.tasks);
-      return JSON.stringify(result);
+     await db.updateTaskWithSummary(args.tasks);
+      return JSON.stringify({
+
+        state: true,
+        message: '批量更新成功',
+
+      })
     } catch (error) {
       return JSON.stringify({
         state: false,
