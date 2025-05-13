@@ -5,14 +5,16 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "go": "pnpm i && pnpm run build && npm run start"
+    "go": "pnpm i && pnpm run db-init && pnpm run build && npm run start",
+    "db-init":"npx prisma generate && npx prisma db push"
   },
   "dependencies": {
     "@prisma/client": "6.3.0",
     "axios": "^1.9.0",
     "fastmcp": "^1.27.4",
     "prisma": "^6.7.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

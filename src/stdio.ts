@@ -1,9 +1,9 @@
 import { FastMCP } from "fastmcp";
 import { z } from "zod"; // Or any validation library that supports Standard Schema
 import { apiTest } from "./apitest.js";
-import { db } from "../server/db.js";
-import { executeTasksAndSaveResults } from "../server/apiTest.js";
-import { exportToExcel } from "../server/createExcel.js";
+import { db } from "./server/db.js";
+import { executeTasksAndSaveResults } from "./server/apiTest.js";
+import { exportToExcel } from "./server/createExcel.js";
 
 const server = new FastMCP({
   name: "My Server",
