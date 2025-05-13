@@ -14,7 +14,7 @@ RUN npm install -g pnpm && pnpm install
 COPY . .
 
 # 构建项目
-RUN pnpm run build
+RUN pnpm run go
 
 # 暴露3000端口
 EXPOSE 3000
