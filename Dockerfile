@@ -1,5 +1,5 @@
 # 使用官方Node.js镜像作为基础镜像
-FROM node:20-alpine
+FROM node:22-alpine
 
 # 设置工作目录
 WORKDIR /usr/src/app
@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package.json pnpm-lock.yaml ./
 
 # 安装依赖
-RUN npm install -g pnpm && pnpm install
+RUN npm config set registry https://registry.npmmirror.com && npm install -g pnpm && pnpm config set registry https://registry.npmmirror.com && pnpm install
 
 # 复制项目文件
 COPY . .
