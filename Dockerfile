@@ -8,7 +8,12 @@ WORKDIR /usr/src/app
 COPY package.json pnpm-lock.yaml ./
 
 # 安装依赖
-RUN npm config set registry https://registry.npmmirror.com && npm install -g pnpm && pnpm config set registry https://registry.npmmirror.com && pnpm install
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm config set disturl https://npmmirror.com/mirrors/node && \
+    npm config set sass_binary_site https://npmmirror.com/mirrors/node-sass && \
+    npm install -g pnpm && \
+    pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install
 
 # 复制项目文件
 COPY . .
