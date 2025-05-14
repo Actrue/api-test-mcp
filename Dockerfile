@@ -1,6 +1,6 @@
 # 使用官方Node.js镜像作为基础镜像
 ## 暂时不可用
-FROM node:22-alpine
+FROM node:20-alpine
 
 # 设置工作目录
 WORKDIR /usr/src/app
@@ -25,4 +25,4 @@ RUN pnpm run build
 EXPOSE 3000
 
 # 启动应用
-CMD ["pnpm", "run", "go"]
+CMD ["pnpm", "run", "start"]
