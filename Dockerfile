@@ -1,4 +1,5 @@
 # 使用官方Node.js镜像作为基础镜像
+## 暂时不可用
 FROM node:22-alpine
 
 # 设置工作目录
@@ -12,9 +13,13 @@ RUN npm install -g pnpm && pnpm install
 
 # 复制项目文件
 COPY . .
-
+# pnpm i && pnpm run db-init && pnpm run build && npm run start
 # 构建项目
-RUN pnpm run go
+RUN pnpm run db-init
+
+RUN pnpm run build
+
+
 
 # 暴露3000端口
 EXPOSE 3000
