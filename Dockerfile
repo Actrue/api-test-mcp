@@ -1,6 +1,6 @@
 # 使用官方Node.js镜像作为基础镜像
 ## 暂时不可用
-FROM node:20-alpine
+FROM node:22-alpine
 
 # 设置工作目录
 WORKDIR /usr/src/app

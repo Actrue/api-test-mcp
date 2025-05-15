@@ -10,10 +10,6 @@
 3. 自动评估接口测试结果
 4. 可导出数据
 
-　　‍
-
-　　‍
-
 ## 快速开始
 
 1. docker部署
@@ -27,27 +23,27 @@ docker run -p 3000:3000  api-test-mcp  ##运行镜像
 
 2. 接入使用（cherry studio 为例）
 
-　　添加服务器->类型选择**sse**->url填写 http://localhost:3000/sse ->点击保存
+添加服务器->类型选择**sse**->url填写 http://localhost:3000/sse ->点击保存
 
 ## 源码构建
 
 ### 环境要求
 
-　　node>=20
+node>=20
 
-　　pnpm
+pnpm
 
 ### 构建过程
 
 ```bash
 git clone https://github.com/Actrue/api-test-mcp.git  ##复制源码
 cd api-test-mcp
-pnpm run go  ##启动命令
+pnpm run go  ##启动命令 此命令将在端口3000启动sse服务器
 ```
 
 ## 使用须知
 
-　　推荐配合以下提示词使用
+推荐配合以下提示词使用
 
 ```txt
 你是一个接口测试员，你将会得到接口的api文档，然后根据接口文档制作接口测试计划表以及计划任务，
@@ -74,3 +70,11 @@ url必须是完整链接
 * Mac
 * Windows
 * Linux
+
+## 技术栈
+
+* [fastmcp-ts](https://github.com/punkpeye/fastmcp)
+* [prisma](https://www.prisma.io/)
+* [xlsx](https://www.npmjs.com/package/xlsx)
+
+‍
