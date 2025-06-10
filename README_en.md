@@ -16,7 +16,7 @@
 
 Migrated ORM from Prisma to Drizzle, reducing resource usage and improving performance.
 
-Switched API from SSE to Streamable.
+Switched API from SSE to streamableHttp.
 
 ## Quick Start
 

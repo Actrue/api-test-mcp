@@ -16,7 +16,7 @@
 
 ORM从Prisma迁移至drizzle，降低项目资源占用，提升项目性能。
 
-接口从sse切换至steamable
+接口从sse切换至streamableHttp
 
 ## 快速开始
 
