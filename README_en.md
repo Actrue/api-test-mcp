@@ -1,12 +1,12 @@
 # api-test-mcp
 
 - API testing tool
-- Generates API test plans, executes tests in batches, evaluates test results, and exports API test results.
+- Generate API test plans, execute batch tests, evaluate test results, and export API test reports.
 
 ### Core Features of api-test-mcp
 
 1. Create test plans
-2. Execute test tasks in batches
+2. Execute batch test tasks
 3. Automatically evaluate API test results
 4. Exportable data
 
@@ -14,24 +14,24 @@
 
 ### June 25, 2024
 
-ORM migrated from Prisma to Drizzle, reducing project resource usage and improving performance.
+Migrated ORM from Prisma to Drizzle, reducing resource usage and improving performance.
 
-API switched from SSE to Streamable.
+Switched API from SSE to Streamable.
 
 ## Quick Start
 
-1. Docker deployment
+1. Docker Deployment
 
 ```bash
-git clone https://github.com/Actrue/api-test-mcp.git  ## Clone the source code
+git clone https://github.com/Actrue/api-test-mcp.git  ## Clone source code
 cd api-test-mcp
-docker build -t api-test-mcp .   ## Build the image
-docker run -p 3000:3000  api-test-mcp  ## Run the image
+docker build -t api-test-mcp .   ## Build image
+docker run -p 3000:3000 -v $(pwd)/data:/usr/src/app/data api-test-mcp  ## Run image (the /data directory is the project's data storage directory)
 ```
 
-Integration (using Cherry Studio as an example)
+Integration (e.g., Cherry Studio)
 
-Add server -> Select type as `streamableHttp` -> Fill in the URL as `http://localhost:3000/mcp` -> Click Save
+Add Server -> Select type as "StreamableHttp" -> Enter URL: http://localhost:3000/mcp -> Click Save
 
 ## Source Code Build
 
@@ -44,9 +44,9 @@ PNPM
 ### Build Process
 
 ```bash
-git clone https://github.com/Actrue/api-test-mcp.git  ## Clone the source code
+git clone https://github.com/Actrue/api-test-mcp.git  ## Clone source code
 cd api-test-mcp
-pnpm run go  ## Start command. This will launch the SSE server on port 3000
+pnpm run go  ## Start command (this will launch the SSE server on port 3000)
 ```
 
 ## Usage Notes
@@ -54,24 +54,24 @@ pnpm run go  ## Start command. This will launch the SSE server on port 3000
 Recommended to use with the following prompt:
 
 ```txt
-You are an API tester. You will receive the API documentation for an interface and then create an API test plan and tasks based on the documentation.
-You need to not only verify whether the API functions correctly but also test whether the interface can handle incorrect data properly.
+You are an API tester. You will receive API documentation and create test plans and tasks based on it.
+You need to verify both the functionality of the API and its ability to handle incorrect data properly.
 If the user forgets to provide a test URL, remind them.
 
 Response format:
-[Plan Test Plan]
+[Plan Test]
 Call the tool to create an API test plan.
-[Call the plugin to execute tests according to the plan]
+[Execute Tests According to Plan]
 Format: Test ID, Test Objective, Test Result.
-[Generate summary and recommendations based on the results]
+[Generate Summary and Recommendations Based on Results]
 Call the tool to write the summary and recommendations into the data table.
-[Test results, exported as Excel]
-Call the tool to obtain the test results.
-[Test Result Summary]
-Summarize the entire testing process.
+[Export Test Results to Excel]
+Call the tool to retrieve test results.
+[Test Summary]
+Summarize the overall testing situation.
 
 Requirements:
-The URL must be a complete link.
+URLs must be complete links.
 ```
 
 ## Supported Platforms
@@ -83,5 +83,5 @@ The URL must be a complete link.
 ## Tech Stack
 
 - [fastmcp-ts](https://github.com/punkpeye/fastmcp)
-- [drizzle ORM](https://orm.drizzle.team/)
+- [Drizzle ORM](https://orm.drizzle.team/)
 - [xlsx](https://www.npmjs.com/package/xlsx)

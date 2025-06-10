@@ -38,7 +38,7 @@ export async function exportToExcel(uuid: string) {
         XLSX.utils.book_append_sheet(wb, ws, '测试任务');
         
         // 检查并创建data目录
-        const dataDir = path.join(process.cwd(), 'data');
+        const dataDir = './data';
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir);
         }

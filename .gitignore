@@ -26,6 +26,6 @@ appenv.ts
 .DS_Store
 generated/prisma/
 prisma/*.db
-data/
+data/*
 test/
 pnpm-lock.yaml

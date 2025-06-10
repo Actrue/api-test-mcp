@@ -26,7 +26,7 @@ ORM从Prisma迁移至drizzle，降低项目资源占用，提升项目性能。
 git clone https://github.com/Actrue/api-test-mcp.git  ##复制源码
 cd api-test-mcp
 docker build -t api-test-mcp .   ##构建镜像
-docker run -p 3000:3000  api-test-mcp  ##运行镜像
+docker run -p 3000:3000 -v $(pwd)/data:/usr/src/app/data api-test-mcp  ##运行镜像，其实/data目录为本项目数据存储目录
 ```
 
 接入使用（cherry studio 为例）
