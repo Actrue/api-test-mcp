@@ -1,7 +1,6 @@
-import { db } from "./db.js";
 import { apiTest } from "../apitest.js";
-import { PrismaClient } from "../../generated/prisma/index.js";
-const prisma = new PrismaClient();
+import { dbClient } from "../db/db.js";
+const db=dbClient;
 export async function executeTasksAndSaveResults(tableUuid: string) {
 
         // 获取所有关联任务
@@ -22,13 +21,13 @@ export async function executeTasksAndSaveResults(tableUuid: string) {
                 body: task.body && typeof task.body === 'object' ? task.body : undefined
             });
             const result = JSON.stringify(response);
-            dbTasks.push(prisma.testTask.update({where:{uuid: task.uuid}, data:{res: result}}))
+            dbTasks.push(db.updateTaskByUuid(task.uuid, {res: result}));
             
             
 
         }
         try {
-            const results = await prisma.$transaction(dbTasks);
+            const results = await Promise.all(dbTasks);
             return {state: true, message: '任务执行成功', data: results};
         }catch(error){
             return {state: false, message: '任务执行失败', data: null}

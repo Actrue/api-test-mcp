@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
-import { db } from './db.js';
 import path from 'path';
 import fs from 'fs';
+import { dbClient } from '../db/db.js';
+const db=dbClient;
 
 export async function exportToExcel(uuid: string) {
     try {

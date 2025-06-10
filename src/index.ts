@@ -1,10 +1,11 @@
+
 import { FastMCP } from "fastmcp";
 import { z } from "zod"; // Or any validation library that supports Standard Schema
 import { apiTest } from "./apitest.js";
-import { db } from "./server/db.js";
 import { executeTasksAndSaveResults } from "./server/apiTest.js";
 import { exportToExcel } from "./server/createExcel.js";
-
+import { dbClient } from "./db/db.js";
+const db=dbClient;
 const server = new FastMCP({
   name: "My Server",
   version: "1.0.0",
@@ -121,10 +122,10 @@ server.addTool({
         message: '执行成功',
         data: res.data?.map((item)=>{
           return {
-            uuid: item.uuid,
-            name: item.name,
+            uuid: item.data?.uuid,
+            name: item.data?.name,
             
-            res: item.res,
+            res: item.data?.res,
           }
 
         })
@@ -263,9 +264,9 @@ server.addTool({
 
 
 server.start({
-  transportType: "sse",
-  sse: {
+  transportType:"httpStream",
+  httpStream: {
     port: 3000,
-    endpoint: "/sse"
+    endpoint: "/mcp"
   }
 });
