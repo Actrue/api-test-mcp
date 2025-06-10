@@ -28,3 +28,4 @@ generated/prisma/
 prisma/*.db
 data/
 test/
+pnpm-lock.yaml
