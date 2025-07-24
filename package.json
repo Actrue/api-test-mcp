@@ -20,12 +20,10 @@
     "init": "pnpm i && pnpm run db-init && pnpm run build"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.9",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "agents": "^0.0.95",
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.44.2",
     "fastmcp": "^1.27.4",
     "hono": "^4.7.11",
     "xlsx": "^0.18.5",
@@ -33,7 +31,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
-    "drizzle-kit": "^0.31.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }

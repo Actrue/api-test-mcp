@@ -1,10 +1,9 @@
 import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/libsql';
-import { eq } from 'drizzle-orm';
-import { testTable, testTask } from './schema.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { randomUUID } from 'crypto';
 
-const db = drizzle(process.env.DB_FILE_NAME!);
-
+// 数据接口定义
 export interface TaskInput {
     name: string;
     method: string;
@@ -36,23 +35,158 @@ export interface ApiResponse<T> {
     data: T | null;
 }
 
-export const dbClient = {
-    createTestPlanWithTasks,
-    updateTaskByUuid,
-    getTasksByTableUuid,
-    getAllTable,
-    addTasksToPlan,
-    updateTaskWithSummary
-};
+// 测试表数据结构
+export interface TestTable {
+    uuid: string;
+    name: string;
+    status: boolean;
+    isFinish: boolean;
+    createTime: string;
+    updatedAt: string;
+}
 
-async function createTestPlanWithTasks(planName: string, tasks: Array<TaskInput>) {
-    try {
-        const testPlan = await db.insert(testTable).values({
-            name: planName
-        }).returning();
+// 测试任务数据结构
+export interface TestTask {
+    uuid: string;
+    testTableUuid: string;
+    name: string;
+    url: string;
+    method: string;
+    query?: object;
+    headers?: object;
+    body?: object;
+    hopeRes: string;
+    res?: string;
+    review?: string;
+    suggest?: string;
+    isFinish: boolean;
+    status: boolean;
+    createTime: string;
+    updatedAt: string;
+}
 
-        const createdTasks = await Promise.all(
-            tasks.map(task => db.insert(testTask).values({
+// JSON数据库类
+class JsonDatabase {
+    private dataDir: string;
+    private testTablesFile: string;
+    private testTasksFile: string;
+
+    constructor() {
+        this.dataDir = path.join(process.cwd(), 'data');
+        this.testTablesFile = path.join(this.dataDir, '测试表.json');
+        this.testTasksFile = path.join(this.dataDir, '测试任务.json');
+        this.initDatabase();
+    }
+
+    /**
+     * 初始化数据库，创建数据目录和文件
+     */
+    private async initDatabase() {
+        try {
+            // 创建数据目录
+            await fs.mkdir(this.dataDir, { recursive: true });
+            
+            // 检查并创建测试表文件
+            try {
+                await fs.access(this.testTablesFile);
+            } catch {
+                await fs.writeFile(this.testTablesFile, JSON.stringify([], null, 2));
+            }
+            
+            // 检查并创建测试任务文件
+            try {
+                await fs.access(this.testTasksFile);
+            } catch {
+                await fs.writeFile(this.testTasksFile, JSON.stringify([], null, 2));
+            }
+        } catch (error) {
+            console.error('初始化数据库失败:', error);
+        }
+    }
+
+    /**
+     * 读取测试表数据
+     */
+    private async readTestTables(): Promise<TestTable[]> {
+        try {
+            const data = await fs.readFile(this.testTablesFile, 'utf-8');
+            return JSON.parse(data);
+        } catch (error) {
+            console.error('读取测试表数据失败:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 写入测试表数据
+     */
+    private async writeTestTables(tables: TestTable[]): Promise<void> {
+        try {
+            await fs.writeFile(this.testTablesFile, JSON.stringify(tables, null, 2));
+        } catch (error) {
+            console.error('写入测试表数据失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 读取测试任务数据
+     */
+    private async readTestTasks(): Promise<TestTask[]> {
+        try {
+            const data = await fs.readFile(this.testTasksFile, 'utf-8');
+            return JSON.parse(data);
+        } catch (error) {
+            console.error('读取测试任务数据失败:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 写入测试任务数据
+     */
+    private async writeTestTasks(tasks: TestTask[]): Promise<void> {
+        try {
+            await fs.writeFile(this.testTasksFile, JSON.stringify(tasks, null, 2));
+        } catch (error) {
+            console.error('写入测试任务数据失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 生成当前时间戳
+     */
+    private getCurrentTimestamp(): string {
+        return new Date().toISOString();
+    }
+
+    /**
+     * 创建测试计划和任务
+     */
+    async createTestPlanWithTasks(planName: string, tasks: Array<TaskInput>): Promise<ApiResponse<{plan: TestTable, tasks: TestTask[]}>> {
+        try {
+            const currentTime = this.getCurrentTimestamp();
+            
+            // 创建测试计划
+            const testPlan: TestTable = {
+                uuid: randomUUID(),
+                name: planName,
+                status: true,
+                isFinish: false,
+                createTime: currentTime,
+                updatedAt: currentTime
+            };
+
+            // 读取现有测试表
+            const existingTables = await this.readTestTables();
+            existingTables.push(testPlan);
+            await this.writeTestTables(existingTables);
+
+            // 创建测试任务
+            const createdTasks: TestTask[] = tasks.map(task => ({
+                uuid: randomUUID(),
+                testTableUuid: testPlan.uuid,
                 name: task.name,
                 method: task.method,
                 url: task.url,
@@ -60,103 +194,154 @@ async function createTestPlanWithTasks(planName: string, tasks: Array<TaskInput>
                 headers: task.headers,
                 body: task.body,
                 hopeRes: task.hopeRes,
-                testTableUuid: testPlan[0].uuid
-            }).returning())
-        );
+                res: undefined,
+                review: undefined,
+                suggest: undefined,
+                isFinish: false,
+                status: true,
+                createTime: currentTime,
+                updatedAt: currentTime
+            }));
 
-        return {
-            state: 1,
-            message: '创建成功',
-            data: {
-                plan: testPlan[0],
-                tasks: createdTasks.map(t => t[0])
-            }
-        };
-    } catch (error) {
-        return {
+            // 读取现有任务并添加新任务
+            const existingTasks = await this.readTestTasks();
+            existingTasks.push(...createdTasks);
+            await this.writeTestTasks(existingTasks);
+
+            return {
+                state: 1,
+                message: '创建成功',
+                data: {
+                    plan: testPlan,
+                    tasks: createdTasks
+                }
+            };
+        } catch (error) {
+            return {
             state: 0,
             message: error instanceof Error ? error.message : '创建失败',
             data: null
         };
+        }
     }
-}
 
-async function updateTaskByUuid(uuid: string, updateData: TaskUpdateInput) {
-    try {
-        const updatedTask = await db.update(testTask)
-            .set(updateData)
-            .where(eq(testTask.uuid, uuid))
-            .returning();
-
-        return {
-            state: 1,
-            message: '更新成功',
-            data: updatedTask[0]
-        };
-    } catch (error) {
-        return {
-            state: 0,
-            message: error instanceof Error ? error.message : '更新失败',
-            data: null
-        };
-    }
-}
-
-async function getTasksByTableUuid(tableUuid: string) {
-    try {
-        const tasks = await db.select()
-            .from(testTask)
-            .where(eq(testTask.testTableUuid, tableUuid))
-            .orderBy(testTask.createTime);
-
-        return {
-            state: 1,
-            message: '查询成功',
-            data: tasks
-        };
-    } catch (error) {
-        return {
-            state: 0,
-            message: error instanceof Error ? error.message : '查询失败',
-            data: null
-        };
-    }
-}
-
-async function getAllTable(uuid: string | undefined) {
-    try {
-        if (uuid) {
-            const tables = await db.select()
-                .from(testTable)
-                .where(eq(testTable.uuid, uuid))
-                .leftJoin(testTask, eq(testTask.testTableUuid, testTable.uuid));
+    /**
+     * 根据UUID更新任务
+     */
+    async updateTaskByUuid(uuid: string, updateData: TaskUpdateInput): Promise<ApiResponse<TestTask>> {
+        try {
+            const tasks = await this.readTestTasks();
+            const taskIndex = tasks.findIndex(task => task.uuid === uuid);
             
-            return {
-                state: 1,
-                message: '查询成功',
-                data: tables.map(t => t.test_task)
+            if (taskIndex === -1) {
+                return {
+                    state: 0,
+                    message: '任务不存在',
+                    data: null
+                };
+            }
+
+            // 更新任务数据
+            const updatedTask = {
+                ...tasks[taskIndex],
+                ...updateData,
+                updatedAt: this.getCurrentTimestamp()
             };
-        } else {
-            const tables = await db.select().from(testTable);
+            
+            tasks[taskIndex] = updatedTask;
+            await this.writeTestTasks(tasks);
+
             return {
                 state: 1,
-                message: '查询成功',
-                data: tables
+                message: '更新成功',
+                data: updatedTask
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '更新失败',
+                data: null
             };
         }
-    } catch (error) {
-        return {
-            state: 0,
-            message: error instanceof Error ? error.message : '查询失败',
-            data: null
-        };
     }
-}
 
-async function addTasksToPlan(uuid: string, tasks: Array<TaskInput>) {
-    try {
-        const createdTasks = await Promise.all(
-            tasks.map(task => db.insert(testTask).values({
+    /**
+     * 根据表UUID获取任务列表
+     */
+    async getTasksByTableUuid(tableUuid: string): Promise<ApiResponse<TestTask[]>> {
+        try {
+            const tasks = await this.readTestTasks();
+            const filteredTasks = tasks
+                .filter(task => task.testTableUuid === tableUuid)
+                .sort((a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime());
+
+            return {
+                state: 1,
+                message: '查询成功',
+                data: filteredTasks
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 获取所有测试表或根据UUID获取特定表的任务
+     */
+    async getAllTable(uuid?: string): Promise<ApiResponse<TestTable[] | TestTask[]>> {
+        try {
+            if (uuid) {
+                // 先检查测试计划是否存在
+                const tables = await this.readTestTables();
+                const tableExists = tables.some(table => table.uuid === uuid);
+                
+                if (!tableExists) {
+                    return {
+                        state: 0,
+                        message: '测试计划不存在',
+                        data: null
+                    };
+                }
+                
+                const tasks = await this.readTestTasks();
+                const filteredTasks = tasks.filter(task => task.testTableUuid === uuid);
+                return {
+                    state: 1,
+                    message: '查询成功',
+                    data: filteredTasks
+                };
+            } else {
+                const tables = await this.readTestTables();
+                return {
+                    state: 1,
+                    message: '查询成功',
+                    data: tables
+                };
+            }
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 向计划添加任务
+     */
+    async addTasksToPlan(uuid: string, tasks: Array<TaskInput>): Promise<ApiResponse<TestTask[]>> {
+        try {
+            const currentTime = this.getCurrentTimestamp();
+            
+            // 创建新任务
+            const createdTasks: TestTask[] = tasks.map(task => ({
+                uuid: randomUUID(),
+                testTableUuid: uuid,
                 name: task.name,
                 method: task.method,
                 url: task.url,
@@ -164,48 +349,84 @@ async function addTasksToPlan(uuid: string, tasks: Array<TaskInput>) {
                 headers: task.headers,
                 body: task.body,
                 hopeRes: task.hopeRes,
-                testTableUuid: uuid
-            }).returning())
-        );
+                res: undefined,
+                review: undefined,
+                suggest: undefined,
+                isFinish: false,
+                status: true,
+                createTime: currentTime,
+                updatedAt: currentTime
+            }));
 
-        return {
-            state: 1,
-            message: `成功在${uuid}计划表增加任务`,
-            data: createdTasks.map(t => t[0])
-        };
-    } catch (error) {
-        return {
-            state: 0,
-            message: error instanceof Error ? error.message : '创建失败',
-            data: null
-        };
+            // 读取现有任务并添加新任务
+            const existingTasks = await this.readTestTasks();
+            existingTasks.push(...createdTasks);
+            await this.writeTestTasks(existingTasks);
+
+            return {
+                state: 1,
+                message: `成功在${uuid}计划表增加任务`,
+                data: createdTasks
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '创建失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 批量更新任务总结
+     */
+    async updateTaskWithSummary(tasks: Array<{uuid: string, summary: string, suggest?: string}>): Promise<ApiResponse<TestTask[]>> {
+        try {
+            const allTasks = await this.readTestTasks();
+            const updatedTasks: TestTask[] = [];
+            const currentTime = this.getCurrentTimestamp();
+
+            for (const taskUpdate of tasks) {
+                const taskIndex = allTasks.findIndex(task => task.uuid === taskUpdate.uuid);
+                if (taskIndex !== -1) {
+                    allTasks[taskIndex] = {
+                        ...allTasks[taskIndex],
+                        review: taskUpdate.summary,
+                        suggest: taskUpdate.suggest || undefined,
+                        isFinish: true,
+                        status: true,
+                        updatedAt: currentTime
+                    };
+                    updatedTasks.push(allTasks[taskIndex]);
+                }
+            }
+
+            await this.writeTestTasks(allTasks);
+
+            return {
+                state: 1,
+                message: `成功为${tasks.length}个任务添加总结`,
+                data: updatedTasks
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '批量更新失败',
+                data: null
+            };
+        }
     }
 }
 
-async function updateTaskWithSummary(tasks: Array<{uuid: string, summary: string, suggest?: string}>) {
-    try {
-        const results = await Promise.all(
-            tasks.map(task => db.update(testTask)
-                .set({
-                    review: task.summary,
-                    suggest: task.suggest || null,
-                    isFinish: true,
-                    status: true
-                })
-                .where(eq(testTask.uuid, task.uuid))
-                .returning())
-        );
+// 创建数据库实例
+const jsonDb = new JsonDatabase();
 
-        return {
-            state: 1,
-            message: `成功为${tasks.length}个任务添加总结`,
-            data: results.map(r => r[0])
-        };
-    } catch (error) {
-        return {
-            state: 0,
-            message: error instanceof Error ? error.message : '批量更新失败',
-            data: null
-        };
-    }
-}
+// 导出数据库客户端，保持与原有接口一致
+export const dbClient = {
+    createTestPlanWithTasks: jsonDb.createTestPlanWithTasks.bind(jsonDb),
+    updateTaskByUuid: jsonDb.updateTaskByUuid.bind(jsonDb),
+    getTasksByTableUuid: jsonDb.getTasksByTableUuid.bind(jsonDb),
+    getAllTable: jsonDb.getAllTable.bind(jsonDb),
+    addTasksToPlan: jsonDb.addTasksToPlan.bind(jsonDb),
+    updateTaskWithSummary: jsonDb.updateTaskWithSummary.bind(jsonDb)
+};

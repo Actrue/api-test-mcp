@@ -6,6 +6,27 @@ const db=dbClient;
 
 export async function exportToExcel(uuid: string) {
     try {
+        // 检查测试计划是否存在
+        const planResult = await db.getAllTable(uuid);
+        
+        // 如果测试计划不存在或查询失败
+        if (!planResult.state) {
+            return {
+                state: false,
+                message: '查询测试计划失败: ' + planResult.message,
+                data: null
+            };
+        }
+        
+        // 如果没有找到测试计划
+        if (!planResult.data) {
+            return {
+                state: false,
+                message: '未找到指定UUID的测试计划',
+                data: null
+            };
+        }
+
         // 获取测试任务数据
         const result = await db.getAllTable(uuid);
         
@@ -45,7 +66,7 @@ export async function exportToExcel(uuid: string) {
         
         // 生成文件名和路径
         const fileName = `${uuid}.xlsx`;
-        const filePath = path.join(dataDir, fileName);
+        const filePath = path.resolve(dataDir, fileName);
         
         // 写入文件
         XLSX.writeFile(wb, filePath);

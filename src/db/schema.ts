@@ -1,52 +1,48 @@
-import { sqliteTable, text, integer,  real } from 'drizzle-orm/sqlite-core';
-import { relations } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
-// TestTable模型
-export const testTable = sqliteTable('test_table', {
-  uuid: text('uuid').primaryKey().default(sql`(uuid())`),
-  name: text('name').notNull(),
-  status: integer('status', { mode: 'boolean' }).default(true),
-  isFinish: integer('is_finish', { mode: 'boolean' }).default(false),
-  createTime: integer('create_time', { mode: 'timestamp' }).default(sql`(current_timestamp)`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(current_timestamp)`),
-});
+// JSON数据库的类型定义文件
 
-// TestTask模型
-export const testTask = sqliteTable('test_task', {
-  uuid: text('uuid').primaryKey().default(sql`(uuid())`),
-  testTableUuid: text('test_table_uuid').notNull(),
-  name: text('name').notNull(),
-  url: text('url').notNull(),
-  method: text('method').notNull(),
-  query: text('query', { mode: 'json' }),
-  headers: text('headers', { mode: 'json' }),
-  body: text('body', { mode: 'json' }),
-  hopeRes: text('hope_res').notNull(),
-  res: text('res'),
-  review: text('review'),
-  suggest: text('suggest'),
-  isFinish: integer('is_finish', { mode: 'boolean' }).default(false),
-  status: integer('status', { mode: 'boolean' }).default(true),
-  createTime: integer('create_time', { mode: 'timestamp' }).default(sql`(current_timestamp)`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(current_timestamp)`),
-});
+// 测试表数据结构
+export interface TestTable {
+    uuid: string;
+    name: string;
+    status: boolean;
+    isFinish: boolean;
+    createTime: string;
+    updatedAt: string;
+}
 
-// 定义关系
+// 测试任务数据结构
+export interface TestTask {
+    uuid: string;
+    testTableUuid: string;
+    name: string;
+    url: string;
+    method: string;
+    query?: object;
+    headers?: object;
+    body?: object;
+    hopeRes: string;
+    res?: string;
+    review?: string;
+    suggest?: string;
+    isFinish: boolean;
+    status: boolean;
+    createTime: string;
+    updatedAt: string;
+}
 
-export const testTableRelations = relations(testTable, ({ many }) => ({
-  testTasks: many(testTask),
-}));
+// 为了保持与原有代码的兼容性，导出类型别名
+export type { TestTable as testTable };
+export type { TestTask as testTask };
 
-export const testTaskRelations = relations(testTask, ({ one }) => ({
-  testTable: one(testTable, {
-    fields: [testTask.testTableUuid],
-    references: [testTable.uuid],
-  }),
-}));
+// 新增类型定义，用于插入操作
+  export type CreateTestTable = Omit<TestTable, 'uuid' | 'createTime' | 'updatedAt'> & {
+    uuid?: string;
+    createTime?: string;
+    updatedAt?: string;
+};
 
-
-export type TestTable = typeof testTable.$inferSelect;
-export type NewTestTable = typeof testTable.$inferInsert;
-
-export type TestTask = typeof testTask.$inferSelect;
-export type NewTestTask = typeof testTask.$inferInsert;
+export type CreateTestTask = Omit<TestTask, 'uuid' | 'createTime' | 'updatedAt'> & {
+    uuid?: string;
+    createTime?: string;
+    updatedAt?: string;
+}

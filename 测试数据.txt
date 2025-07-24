@@ -1,0 +1,60 @@
+# api-test 测试数据
+{
+  "url": "https://jsonplaceholder.typicode.com/posts/1",
+  "method": "GET",
+  "headers": {
+    "Content-Type": "application/json"
+  }
+}
+
+# create-test-plan 测试数据
+{
+  "planName": "示例测试计划",
+  "tasks": [
+    {
+      "name": "测试任务1",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "hopeRes": "200 OK"
+    }
+  ]
+}
+
+# get-test-plans 测试数据
+{
+  "uuid": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+# execute-test-plan 测试数据
+{
+  "tableUuid": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+# add-tasks-to-plan 测试数据
+{
+  "uuid": "123e4567-e89b-12d3-a456-426614174000",
+  "tasks": [
+    {
+      "name": "新增测试任务",
+      "method": "POST",
+      "url": "https://jsonplaceholder.typicode.com/posts",
+      "body": {
+        "title": "foo",
+        "body": "bar",
+        "userId": 1
+      },
+      "hopeRes": "201 Created"
+    }
+  ]
+}
+
+# batch-update-task-summaries 测试数据
+{
+  "tasks": [
+    {
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "summary": "测试通过",
+      "suggest": "无"
+    }
+  ]
+}

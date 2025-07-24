@@ -1,3 +1,4 @@
+
 import { FastMCP } from "fastmcp";
 import { z } from "zod"; // Or any validation library that supports Standard Schema
 import { apiTest } from "./apitest.js";
@@ -16,7 +17,7 @@ server.addTool({
   description: "这是一个用于测试API的工具，需要URL参数，可选method/query/headers/body参数；",
   parameters: z.object({
     url: z.string().url(),
-    method: z.string().optional(),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).optional(),
     query: z.record(z.string()).optional(),
     headers: z.record(z.string()).optional(),
     body: z.any().optional()
@@ -64,8 +65,7 @@ server.addTool({
     }))
   }),
   execute: async (args) => {
-    console.log(args)
-
+    
     try {
       const res = await db.createTestPlanWithTasks(args.planName, args.tasks);
       return JSON.stringify({
@@ -259,6 +259,9 @@ server.addTool({
     }
   },
 });
+
+
+
 
 
 server.start({
