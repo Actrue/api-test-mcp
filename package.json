@@ -13,25 +13,35 @@
   ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev-web": "tsx watch src/hono.ts",
     "build": "tsc",
-    "start": "node dist/src/index.js",
-    "go": "pnpm i && pnpm run db-init && pnpm run build && npm run start",
-    "db-init": "npx drizzle-kit push",
-    "init": "pnpm i && pnpm run db-init && pnpm run build"
+    "start": "npx tsx src/index.ts s",
+    "start-web": "node dist/src/hono.js",
+    "go": "pnpm i &&   npm run start",
+    "go-web": "pnpm i && pnpm run db-init && pnpm run build && npm run start-web",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@hono/node-server": "^1.17.1",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "agents": "^0.0.95",
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
-    "fastmcp": "^1.27.4",
+    "express": "^5.1.0",
+    "fastmcp": "^1.27.7",
     "hono": "^4.7.11",
     "xlsx": "^0.18.5",
     "zod": "^3.24.4"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/node": "^20.11.17",
+    "@vitest/ui": "^3.2.4",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }

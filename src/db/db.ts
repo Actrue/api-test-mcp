@@ -416,6 +416,193 @@ class JsonDatabase {
             };
         }
     }
+
+    /**
+     * 获取所有测试计划
+     */
+    async getAllPlans(): Promise<ApiResponse<TestTable[]>> {
+        try {
+            const tables = await this.readTestTables();
+            return {
+                state: 1,
+                message: '查询成功',
+                data: tables
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 根据UUID获取单个测试计划
+     */
+    async getTestPlanById(uuid: string): Promise<ApiResponse<TestTable>> {
+        try {
+            const tables = await this.readTestTables();
+            const table = tables.find(table => table.uuid === uuid);
+            
+            if (!table) {
+                return {
+                    state: 0,
+                    message: '测试计划不存在',
+                    data: null
+                };
+            }
+
+            return {
+                state: 1,
+                message: '查询成功',
+                data: table
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 根据ID获取单个测试计划（别名方法）
+     */
+    async getPlanById(id: string): Promise<ApiResponse<TestTable>> {
+        return this.getTestPlanById(id);
+    }
+
+    /**
+     * 删除测试计划（别名方法）
+     */
+    async deletePlan(id: string): Promise<ApiResponse<boolean>> {
+        return this.deleteTestPlan(id);
+    }
+
+    /**
+     * 删除测试计划及其相关任务
+     */
+    async deleteTestPlan(uuid: string): Promise<ApiResponse<boolean>> {
+        try {
+            const tables = await this.readTestTables();
+            const tableIndex = tables.findIndex(table => table.uuid === uuid);
+            
+            if (tableIndex === -1) {
+                return {
+                    state: 0,
+                    message: '测试计划不存在',
+                    data: null
+                };
+            }
+
+            // 删除测试计划
+            tables.splice(tableIndex, 1);
+            await this.writeTestTables(tables);
+
+            // 删除相关任务
+            const tasks = await this.readTestTasks();
+            const filteredTasks = tasks.filter(task => task.testTableUuid !== uuid);
+            await this.writeTestTasks(filteredTasks);
+
+            return {
+                state: 1,
+                message: '删除成功',
+                data: true
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '删除失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 获取所有测试任务
+     */
+    async getAllTasks(): Promise<ApiResponse<TestTask[]>> {
+        try {
+            const tasks = await this.readTestTasks();
+            return {
+                state: 1,
+                message: '查询成功',
+                data: tasks
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 根据UUID获取单个测试任务
+     */
+    async getTaskById(uuid: string): Promise<ApiResponse<TestTask>> {
+        try {
+            const tasks = await this.readTestTasks();
+            const task = tasks.find(task => task.uuid === uuid);
+            
+            if (!task) {
+                return {
+                    state: 0,
+                    message: '测试任务不存在',
+                    data: null
+                };
+            }
+
+            return {
+                state: 1,
+                message: '查询成功',
+                data: task
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '查询失败',
+                data: null
+            };
+        }
+    }
+
+    /**
+     * 删除测试任务
+     */
+    async deleteTask(uuid: string): Promise<ApiResponse<boolean>> {
+        try {
+            const tasks = await this.readTestTasks();
+            const taskIndex = tasks.findIndex(task => task.uuid === uuid);
+            
+            if (taskIndex === -1) {
+                return {
+                    state: 0,
+                    message: '测试任务不存在',
+                    data: null
+                };
+            }
+
+            // 删除任务
+            tasks.splice(taskIndex, 1);
+            await this.writeTestTasks(tasks);
+
+            return {
+                state: 1,
+                message: '删除成功',
+                data: true
+            };
+        } catch (error) {
+            return {
+                state: 0,
+                message: error instanceof Error ? error.message : '删除失败',
+                data: null
+            };
+        }
+    }
 }
 
 // 创建数据库实例
@@ -428,5 +615,13 @@ export const dbClient = {
     getTasksByTableUuid: jsonDb.getTasksByTableUuid.bind(jsonDb),
     getAllTable: jsonDb.getAllTable.bind(jsonDb),
     addTasksToPlan: jsonDb.addTasksToPlan.bind(jsonDb),
-    updateTaskWithSummary: jsonDb.updateTaskWithSummary.bind(jsonDb)
+    updateTaskWithSummary: jsonDb.updateTaskWithSummary.bind(jsonDb),
+    getTestPlanById: jsonDb.getTestPlanById.bind(jsonDb),
+    deleteTestPlan: jsonDb.deleteTestPlan.bind(jsonDb),
+    getAllTasks: jsonDb.getAllTasks.bind(jsonDb),
+    getTaskById: jsonDb.getTaskById.bind(jsonDb),
+    deleteTask: jsonDb.deleteTask.bind(jsonDb),
+    getAllPlans: jsonDb.getAllPlans.bind(jsonDb),
+    getPlanById: jsonDb.getPlanById.bind(jsonDb),
+    deletePlan: jsonDb.deletePlan.bind(jsonDb)
 };
