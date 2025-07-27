@@ -12,6 +12,10 @@
 
 ## 更新信息
 
+### 25 7月28日
+
+去掉sqlite数据库，使用本地json存储数据，轻量化项目
+
 ### 25 6月 10日
 
 ORM从Prisma迁移至drizzle，降低项目资源占用，提升项目性能。
@@ -20,7 +24,7 @@ ORM从Prisma迁移至drizzle，降低项目资源占用，提升项目性能。
 
 ## 快速开始
 
-1. docker部署
+1. 本地部署部署
 
 ```bash
 git clone https://github.com/Actrue/api-test-mcp.git  ##复制源码
